@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useCallback } from "react";
 import { saveFavorite } from "../services/storage";
 
 import {
@@ -29,11 +29,26 @@ export default function MovieCard({ movie, navigation }) {
     }).start();
   };
 
+  const onFocus = () => {
+    Animated.spring(scale, { toValue: 1.08, useNativeDriver: true }).start();
+  };
+
+  const onBlur = () => {
+    Animated.spring(scale, { toValue: 1, useNativeDriver: true }).start();
+  };
+
+  const handleNavigate = useCallback(() => {
+    navigation.navigate("Detail", { movie });
+  }, [navigation, movie]);
+
   return (
     <Pressable
-      onPress={() => navigation.navigate("Detail", { movie })}
+      onPress={handleNavigate}
       onPressIn={onPressIn}
       onPressOut={onPressOut}
+      onFocus={onFocus}
+      onBlur={onBlur}
+      style={{ marginHorizontal: 6 }}
     >
       <Animated.View style={[styles.card, { transform: [{ scale }] }]}>
         <Image
@@ -42,7 +57,11 @@ export default function MovieCard({ movie, navigation }) {
           }}
           style={styles.image}
         />
-        <Text style={styles.title}>{movie.title}</Text>
+        <View style={styles.meta}>
+          <Text numberOfLines={2} style={styles.title}>
+            {movie.title}
+          </Text>
+        </View>
         <TouchableOpacity
           style={styles.heart}
           onPress={() => saveFavorite(movie)}
@@ -69,7 +88,13 @@ const styles = StyleSheet.create({
   },
   title: {
     marginTop: 8,
-    fontWeight: "bold",
+    fontWeight: "700",
+    color: colors.text,
+    fontSize: 14,
+  },
+  meta: {
+    marginTop: 8,
+    minHeight: 44,
   },
   heart: {
     position: "absolute",

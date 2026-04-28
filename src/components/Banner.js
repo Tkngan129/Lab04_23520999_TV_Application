@@ -1,5 +1,6 @@
 import { View, Text, ImageBackground, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import colors from "../constants/colors";
 
 export default function Banner({ movie }) {
   if (!movie) return null;
@@ -25,6 +26,7 @@ const styles = StyleSheet.create({
   banner: {
     height: 250,
     justifyContent: "flex-end",
+    backgroundColor: colors.soft,
   },
   overlay: {
     padding: 20,

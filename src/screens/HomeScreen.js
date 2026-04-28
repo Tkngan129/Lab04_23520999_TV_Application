@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { View, FlatList, Text, StyleSheet } from "react-native";
+import { View, FlatList, Text, StyleSheet, TouchableOpacity } from "react-native";
 import {
   fetchPopular,
   fetchTopRated,
@@ -8,6 +8,7 @@ import {
 import MovieCard from "../components/MovieCard";
 import Banner from "../components/Banner";
 import SearchBar from "../components/SearchBar";
+import RowList from "../components/RowList";
 import colors from "../constants/colors";
 
 export default function HomeScreen({ navigation }) {
@@ -48,42 +49,35 @@ export default function HomeScreen({ navigation }) {
     }
   };
 
+  const keyExtractor = (item) => String(item.id || item._id || item.title);
+
+  const renderMovie = ({ item }) => <MovieCard movie={item} navigation={navigation} />;
+
   return (
     <View style={styles.container}>
       <Banner movie={Array.isArray(popular) && popular.length > 0 ? popular[0] : null} />
 
-      <SearchBar value={query} onChange={handleSearch} />
+      <View style={styles.searchRow}>
+        <SearchBar value={query} onChange={handleSearch} />
+        {searchResult.length > 0 && (
+          <TouchableOpacity
+            onPress={() => {
+              setQuery("");
+              setSearchResult([]);
+            }}
+            style={styles.clearButton}
+          >
+            <Text style={styles.clearText}>Back</Text>
+          </TouchableOpacity>
+        )}
+      </View>
 
       {searchResult.length > 0 ? (
-        <>
-          <Text style={styles.title}>Search Result</Text>
-          <FlatList
-            data={searchResult}
-            horizontal
-            renderItem={({ item }) => (
-              <MovieCard movie={item} navigation={navigation} />
-            )}
-          />
-        </>
+        <RowList title="Search Results" data={searchResult} renderItem={renderMovie} keyExtractor={keyExtractor} />
       ) : (
         <>
-          <Text style={styles.title}>Popular</Text>
-          <FlatList
-            data={popular}
-            horizontal
-            renderItem={({ item }) => (
-              <MovieCard movie={item} navigation={navigation} />
-            )}
-          />
-
-          <Text style={styles.title}>Top Rated</Text>
-          <FlatList
-            data={topRated}
-            horizontal
-            renderItem={({ item }) => (
-              <MovieCard movie={item} navigation={navigation} />
-            )}
-          />
+          <RowList title="Popular" data={popular} renderItem={renderMovie} keyExtractor={keyExtractor} />
+          <RowList title="Top Rated" data={topRated} renderItem={renderMovie} keyExtractor={keyExtractor} />
         </>
       )}
     </View>
@@ -98,4 +92,17 @@ const styles = StyleSheet.create({
     margin: 10,
     color: colors.primary,
   },
+  searchRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 10,
+  },
+  clearButton: {
+    marginLeft: 10,
+    backgroundColor: colors.primary,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  clearText: { color: "#fff", fontWeight: "700" },
 });
